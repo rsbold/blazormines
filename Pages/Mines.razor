@@ -1,0 +1,140 @@
+@page "/mines"
+@using Components
+@using Models
+
+<PageTitle>Mines</PageTitle>
+
+<table>
+    @for(int row=0; row < 10; row++)
+    {
+        <tr>
+        @for(int col = 0; col < 10; col++)
+        {
+            int index = row * 10 + col;
+            <td>
+                <Cell State=boardState[index] 
+                      OnCellClicked="@(args => CellClicked(args))"/>
+            </td>
+        }
+        </tr>
+        
+    }
+
+</table>
+
+Total button clicks: @TotalButtonClicks<br />
+Cells cleared: @CellsCleared<br />
+<button Class="btn btn-primary" @onclick="New">New Game</button>
+
+@code{
+    private int TotalButtonClicks = 0;
+    private int CellsCleared = 0;
+    private List<CellState> boardState = new();
+
+    protected override void OnInitialized()
+    {
+        SetUp();
+    }
+
+    private void New()
+    {
+        Console.WriteLine("In New()");
+        SetUp();
+        StateHasChanged();
+    }
+
+    private void SetUp()
+    {
+        boardState.Clear();
+        TotalButtonClicks = 0;
+        CellsCleared = 0;
+        List<int> minePositions = new();
+        var rand = new Random();
+
+        // Where are mines going to be?
+        for(int i = 0; i < 10; i++)
+        {
+            minePositions.Add(rand.Next(0, 99));
+        }
+
+        // Populate the board state
+        for(int i = 0;  i < 100;  i++)
+        {
+            bool isMine = minePositions.Contains(i);
+            boardState.Add(new CellState
+            {
+                Index = i,
+                IsMine = isMine,
+                IsShown = false
+            });
+        }
+
+        // Populate neighbour counts
+        foreach(var state in boardState)
+        {
+            state.NeighbourMines = CountNeighbouringMines(state);
+        }
+
+    }
+
+    private void CellClicked(CellState state)
+    {
+        boardState[state.Index].IsShown = true;
+        if(boardState[state.Index].IsMine)
+        {
+            GameOver();
+        }
+        else
+        {
+            TotalButtonClicks++;
+            CellsCleared++;
+        }
+    }
+
+    private int CountNeighbouringMines(CellState state)
+    {
+        //List<CellState> cellsToCheck = new();
+        int count = 0;
+        int refRow = state.Index / 10;
+        int refCol = state.Index % 10;
+
+        Console.WriteLine($"Checking neighbours of cell at row={refRow}, col={refCol}");
+
+        List<int> rowsToCheck = new();
+        // Always check same row
+        rowsToCheck.Add(refRow);
+        if(refRow > 0)
+            rowsToCheck.Add(refRow -1);
+        if(refRow < 9)
+            rowsToCheck.Add(refRow + 1);
+
+        List<int> colsToCheck = new();
+        //Always check same column
+        colsToCheck.Add(refCol);
+        if(refCol > 0)
+            colsToCheck.Add(refCol - 1);
+        if(refCol < 9)
+            colsToCheck.Add(refCol + 1);
+        
+        foreach(var row in rowsToCheck)
+        {
+            foreach(var col in colsToCheck)
+            {
+                if(!(row == refRow && col == refCol))
+                {
+                    int index = row * 10 + col;
+                    Console.WriteLine($"Checking row {row} col {col} index {index}");
+                    if(boardState[index].IsMine)
+                        count++;
+                }
+            }
+        }
+        
+        return count;      
+    }
+
+    private void GameOver()
+    {
+        boardState.ForEach(s => s.IsShown = true);
+    }
+}

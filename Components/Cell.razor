@@ -1,0 +1,52 @@
+@namespace Components
+@using Models
+
+<button Class="@ButtonClass()" style="@ButtonStyle()" @onclick="CellClicked">@ButtonCaption()</button>
+
+
+@code{
+    [Parameter]
+    public CellState State {get;set;} = new();
+    
+    [Parameter]
+    public EventCallback<CellState> OnCellClicked {get;set;}
+
+
+    private string ButtonCaption()
+    {
+        if(State.IsShown)
+        {
+            if(State.IsMine)
+                return "*";
+            else
+                return State.NeighbourMines.ToString();
+        }
+        else
+        {
+            return "?";
+        }
+    }
+
+    private string ButtonStyle()
+    {
+        if(State.IsShown && State.IsMine)
+            return "color: red;";
+        else
+            return "";
+    }
+
+    private string ButtonClass()
+    {
+        if(State.IsShown)
+            return "btn btn-light";
+        else
+            return "btn btn-primary";
+    }
+    private async Task CellClicked(MouseEventArgs args)
+    {
+        if(args.Button == 2)
+            Console.WriteLine("Mark cell");
+        else
+            await OnCellClicked.InvokeAsync(State);
+    }
+}
