@@ -17,18 +17,22 @@
             </td>
         }
         </tr>
-        
     }
 
 </table>
 
 Total button clicks: @TotalButtonClicks<br />
 Cells cleared: @CellsCleared<br />
+@if(IsGameWon())
+{
+    <p>You won</p>
+}
 <button Class="btn btn-primary" @onclick="New">New Game</button>
 
 @code{
     private int TotalButtonClicks = 0;
     private int CellsCleared = 0;
+    private int NonMineCells = 0;
     private List<CellState> boardState = new();
 
     protected override void OnInitialized()
@@ -38,7 +42,6 @@ Cells cleared: @CellsCleared<br />
 
     private void New()
     {
-        Console.WriteLine("In New()");
         SetUp();
         StateHasChanged();
     }
@@ -75,6 +78,9 @@ Cells cleared: @CellsCleared<br />
             state.NeighbourMines = CountNeighbouringMines(state);
         }
 
+        // Finally cound the number of non-mine cells so we can work out if user has completed game.
+        NonMineCells = boardState.Count(c => !c.IsMine);
+
     }
 
     private void CellClicked(CellState state)
@@ -82,6 +88,7 @@ Cells cleared: @CellsCleared<br />
         boardState[state.Index].IsShown = true;
         if(boardState[state.Index].IsMine)
         {
+            // User clicked on a mine, game over.
             GameOver();
         }
         else
@@ -133,6 +140,13 @@ Cells cleared: @CellsCleared<br />
         return count;      
     }
 
+    private bool IsGameWon()
+    {
+        return CellsCleared == NonMineCells;
+
+    }
+
+    
     private void GameOver()
     {
         boardState.ForEach(s => s.IsShown = true);
