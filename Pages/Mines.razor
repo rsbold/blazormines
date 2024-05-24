@@ -1,10 +1,10 @@
-@page "/mines"
+@page "/"
 @using Components
 @using Models
 
 <PageTitle>Mines</PageTitle>
-
-<table>
+<div class="game-title">Minesweeper</div>
+<table class="game-board">
     @for(int row=0; row < 10; row++)
     {
         <tr>
@@ -13,14 +13,13 @@
             int index = row * 10 + col;
             <td>
                 <Cell State=boardState[index] 
-                      OnCellClicked="@(args => CellClicked(args))"/>
+                    OnCellClicked="@(args => CellClicked(args))"/>
             </td>
         }
         </tr>
     }
 
 </table>
-
 Total button clicks: @TotalButtonClicks<br />
 Cells cleared: @CellsCleared<br />
 @if(IsGameWon())
