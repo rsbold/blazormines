@@ -22,6 +22,7 @@
 </table>
 Total button clicks: @TotalButtonClicks<br />
 Cells cleared: @CellsCleared<br />
+Cells to clear: @CellsToClear<br />
 @if(IsGameWon())
 {
     <p>You won</p>
@@ -31,6 +32,7 @@ Cells cleared: @CellsCleared<br />
 @code{
     private int TotalButtonClicks = 0;
     private int CellsCleared = 0;
+    private int CellsToClear;
     private int NonMineCells = 0;
     private List<CellState> boardState = new();
 
@@ -79,7 +81,7 @@ Cells cleared: @CellsCleared<br />
 
         // Finally cound the number of non-mine cells so we can work out if user has completed game.
         NonMineCells = boardState.Count(c => !c.IsMine);
-
+        CellsToClear = 100 - boardState.Count(c => c.IsMine);
     }
 
     private void CellClicked(CellState state)
@@ -94,6 +96,7 @@ Cells cleared: @CellsCleared<br />
         {
             TotalButtonClicks++;
             CellsCleared++;
+            CellsToClear = 100 - CellsCleared - boardState.Count(c => c.IsMine);
         }
     }
 
